@@ -117,6 +117,8 @@ export class Board {
   }
 
   randomizeShips(shipConfigs) {
+    this.reset();
+    
     for (const config of shipConfigs) {
       const ship = new Ship(config.name, config.size);
       let placed = false;
