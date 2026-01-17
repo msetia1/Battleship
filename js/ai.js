@@ -1,10 +1,7 @@
 import { CONFIG } from './config.js';
-import { Board } from './board.js';
 
 export class AI {
   constructor() {
-    this.board = new Board();
-    this.board.randomizeShips(CONFIG.SHIPS);
     this.attackedCells = new Set();
     this.currentHits = [];
     this.queue = [];
@@ -76,7 +73,6 @@ export class AI {
     const maxY = Math.max(...ys);
 
     if (minY === maxY) {
-      // Horizontal ship
       if (this.isValidTarget(minX - 1, minY)) {
         this.queue.push({ x: minX - 1, y: minY });
       }
@@ -84,7 +80,6 @@ export class AI {
         this.queue.push({ x: maxX + 1, y: maxY });
       }
     } else {
-      // Vertical ship
       if (this.isValidTarget(minX, minY - 1)) {
         this.queue.push({ x: minX, y: minY - 1 });
       }
@@ -102,5 +97,11 @@ export class AI {
       return false;
     }
     return true;
+  }
+
+  reset() {
+    this.attackedCells = new Set();
+    this.currentHits = [];
+    this.queue = [];
   }
 }
