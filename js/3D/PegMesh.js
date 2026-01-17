@@ -20,9 +20,9 @@ export class PegMesh {
       metalness: 0.1
     });
 
-    // Peg dimensions
+    // Peg dimensions - made taller
     this.pegRadius = 0.15;
-    this.pegHeight = 0.4;
+    this.pegHeight = 0.7; // Changed from 0.4
     this.pinRadius = 0.08;
     this.pinHeight = 0.25;
   }

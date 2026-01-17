@@ -23,9 +23,9 @@ export class GameRenderer {
     this.playerBoard.setPosition(0, 0, 6);
     this.playerBoard.setRotation(0, 0, 0);
 
-    // CPU board (screen) - tilted up, further from camera
-    this.cpuBoard.setPosition(0, 3, -6);
-    this.cpuBoard.setRotation(-Math.PI / 4, 0, 0);
+    // CPU board (screen) - tilted toward player, further from camera
+    this.cpuBoard.setPosition(0, 6, -4);
+    this.cpuBoard.setRotation(Math.PI / 3, 0, 0); // Tilted toward player
 
     // Add boards to scene
     this.playerBoard.addToScene(this.scene);
@@ -62,7 +62,7 @@ export class GameRenderer {
       0.8
     );
     const hinge = new THREE.Mesh(hingeGeometry, hingeMaterial);
-    hinge.position.set(0, 1.2, 0);
+    hinge.position.set(0, 0.2, 0.5);
     hinge.castShadow = true;
     hinge.receiveShadow = true;
     this.scene.add(hinge);
@@ -100,17 +100,17 @@ export class GameRenderer {
 
   /**
    * Update ship meshes on both boards
-   */
+   */ 
   updateShips(state) {
     // Clear existing player ships
     this.playerShipMeshes.forEach(mesh => {
-      this.playerBoard.group.remove(mesh);
+    this.playerBoard.group.remove(mesh);
     });
     this.playerShipMeshes = [];
 
-    // Add player ships
+    // Add player ships (always visible on player board)
     for (const ship of state.playerBoard.ships) {
-      if (ship.positions.length > 0) {
+    if (ship.positions.length > 0) {
         const shipMesh = this.shipMeshes.createShip(ship.name, ship.size);
         const startPos = ship.positions[0];
         const endPos = ship.positions[ship.positions.length - 1];
@@ -121,29 +121,32 @@ export class GameRenderer {
         this.shipMeshes.positionShip(shipMesh, startPos.x, startPos.y, orientation, this.playerBoard);
         this.playerBoard.group.add(shipMesh);
         this.playerShipMeshes.push(shipMesh);
-      }
+    }
     }
 
-    // Only show CPU ships when game is finished
+    // Clear existing CPU ships
     this.cpuShipMeshes.forEach(mesh => {
-      this.cpuBoard.group.remove(mesh);
+    this.cpuBoard.group.remove(mesh);
     });
     this.cpuShipMeshes = [];
 
-    if (state.phase === 'finished') {
-      for (const ship of state.cpuBoard.ships) {
-        if (ship.positions.length > 0) {
-          const shipMesh = this.shipMeshes.createShip(ship.name, ship.size);
-          const startPos = ship.positions[0];
-          const endPos = ship.positions[ship.positions.length - 1];
+    // Show CPU ships that are sunk, or all ships when game is finished
+    for (const ship of state.cpuBoard.ships) {
+    if (ship.positions.length > 0) {
+        const shouldShow = state.phase === 'finished' || ship.isSunk();
+        
+        if (shouldShow) {
+        const shipMesh = this.shipMeshes.createShip(ship.name, ship.size);
+        const startPos = ship.positions[0];
+        const endPos = ship.positions[ship.positions.length - 1];
 
-          const orientation = startPos.y === endPos.y ? 'horizontal' : 'vertical';
+        const orientation = startPos.y === endPos.y ? 'horizontal' : 'vertical';
 
-          this.shipMeshes.positionShip(shipMesh, startPos.x, startPos.y, orientation, this.cpuBoard);
-          this.cpuBoard.group.add(shipMesh);
-          this.cpuShipMeshes.push(shipMesh);
+        this.shipMeshes.positionShip(shipMesh, startPos.x, startPos.y, orientation, this.cpuBoard);
+        this.cpuBoard.group.add(shipMesh);
+        this.cpuShipMeshes.push(shipMesh);
         }
-      }
+    }
     }
   }
 

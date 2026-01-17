@@ -9,9 +9,9 @@ export class CameraController {
     this.setupPosition = new THREE.Vector3(0, 18, 6);
     this.setupLookAt = new THREE.Vector3(0, 0, 6);
 
-    // Play: pulled back and angled to see both boards
-    this.playPosition = new THREE.Vector3(0, 20, 18);
-    this.playLookAt = new THREE.Vector3(0, 0, 0);
+    // Play: pulled back and higher to see both boards
+    this.playPosition = new THREE.Vector3(0, 28, 20);
+    this.playLookAt = new THREE.Vector3(0, 3, 0);
 
     // Animation state
     this.isAnimating = false;
