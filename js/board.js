@@ -110,4 +110,19 @@ export class Board {
   allShipsSunk() {
     return this.ships.length > 0 && this.ships.every(ship => ship.isSunk());
   }
+
+  placeShipsRandomly(shipConfigs) {
+    for (const config of shipConfigs) {
+      const ship = new Ship(config.name, config.size);
+      let placed = false;
+  
+      while (!placed) {
+        const orientation = Math.random() < 0.5 ? 'horizontal' : 'vertical';
+        const x = Math.floor(Math.random() * this.gridSize);
+        const y = Math.floor(Math.random() * this.gridSize);
+  
+        placed = this.placeShip(ship, x, y, orientation);
+      }
+    }
+  }
 }
