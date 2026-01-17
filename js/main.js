@@ -7,7 +7,9 @@ const targetBoardEl = document.getElementById("target-board");
 
 const statusEl = document.getElementById("status");
 const rotateBtn = document.getElementById("rotate-btn");
+const randomizeBtn = document.getElementById("randomize-btn");
 const startBtn = document.getElementById("start-btn");
+const newGameBtn = document.getElementById("new-game-btn");
 
 function setStatus(text) {
   if (statusEl) statusEl.textContent = text;
@@ -16,8 +18,9 @@ function setStatus(text) {
 /**
  * Build GRID_SIZE x GRID_SIZE DOM cells once.
  * onCellClick(x,y) is called when user clicks a cell.
+ * onCellHover(x,y) is called on mouseenter, onCellLeave() on mouseleave.
  */
-function buildGrid(container, onCellClick) {
+function buildGrid(container, onCellClick, onCellHover, onCellLeave) {
   container.innerHTML = "";
 
   for (let y = 0; y < CONFIG.GRID_SIZE; y++) {
@@ -31,8 +34,59 @@ function buildGrid(container, onCellClick) {
         cell.addEventListener("click", () => onCellClick(x, y));
       }
 
+      if (onCellHover) {
+        cell.addEventListener("mouseenter", () => onCellHover(x, y));
+      }
+
+      if (onCellLeave) {
+        cell.addEventListener("mouseleave", () => onCellLeave());
+      }
+
       container.appendChild(cell);
     }
+  }
+}
+
+/**
+ * Clear all preview classes from a container
+ */
+function clearPreview(container) {
+  const cells = container.querySelectorAll(".cell");
+  cells.forEach((cell) => {
+    cell.classList.remove("preview", "preview-invalid");
+  });
+}
+
+/**
+ * Show ship placement preview
+ */
+function showPreview(container, board, ship, x, y, orientation) {
+  clearPreview(container);
+
+  if (!ship) return;
+
+  const positions = board.getShipPositions(ship, x, y, orientation);
+  const canPlace = board.canPlaceShip(ship, x, y, orientation);
+
+  if (!positions) {
+    // Ship goes out of bounds - show what we can in red
+    for (let i = 0; i < ship.size; i++) {
+      const posX = orientation === "horizontal" ? x + i : x;
+      const posY = orientation === "vertical" ? y + i : y;
+
+      if (posX >= 0 && posX < CONFIG.GRID_SIZE && posY >= 0 && posY < CONFIG.GRID_SIZE) {
+        const cell = container.querySelector(`[data-x="${posX}"][data-y="${posY}"]`);
+        if (cell) cell.classList.add("preview-invalid");
+      }
+    }
+    return;
+  }
+
+  const previewClass = canPlace ? "preview" : "preview-invalid";
+
+  for (const pos of positions) {
+    const cell = container.querySelector(`[data-x="${pos.x}"][data-y="${pos.y}"]`);
+    if (cell) cell.classList.add(previewClass);
   }
 }
 
@@ -48,7 +102,15 @@ function renderBoard(container, board, revealShips) {
     const y = Number(cell.dataset.y);
     const state = board.grid[y][x];
 
+    // Preserve preview classes
+    const hasPreview = cell.classList.contains("preview");
+    const hasPreviewInvalid = cell.classList.contains("preview-invalid");
+
     cell.className = "cell";
+
+    // Restore preview classes
+    if (hasPreview) cell.classList.add("preview");
+    if (hasPreviewInvalid) cell.classList.add("preview-invalid");
 
     // Always show shots
     if (state === CONFIG.CELL_STATE.HIT) cell.classList.add("hit");
@@ -105,15 +167,34 @@ const game = new Game({
 });
 
 // ----- Build grids -----
-buildGrid(playerBoardEl, (x, y) => {
-  const state = game.getState();
+buildGrid(
+  playerBoardEl,
+  (x, y) => {
+    const state = game.getState();
 
-  // Setup: place ships on player board
-  if (state.phase === "setup") {
-    const res = game.tryPlacePlayerShip(x, y);
-    if (!res.ok) setStatus(res.message);
+    // Setup: place ships on player board
+    if (state.phase === "setup") {
+      const res = game.tryPlacePlayerShip(x, y);
+      if (!res.ok) setStatus(res.message);
+    }
+  },
+  (x, y) => {
+    const state = game.getState();
+
+    // Setup: show preview on hover
+    if (state.phase === "setup" && state.currentShip) {
+      showPreview(playerBoardEl, state.playerBoard, state.currentShip, x, y, state.orientation);
+    }
+  },
+  () => {
+    const state = game.getState();
+
+    // Setup: clear preview on leave
+    if (state.phase === "setup") {
+      clearPreview(playerBoardEl);
+    }
   }
-});
+);
 
 buildGrid(targetBoardEl, (x, y) => {
   const state = game.getState();
@@ -128,9 +209,20 @@ buildGrid(targetBoardEl, (x, y) => {
 // ----- Buttons -----
 rotateBtn?.addEventListener("click", () => game.toggleOrientation());
 
+randomizeBtn?.addEventListener("click", () => {
+  const state = game.getState();
+  if (state.phase === "setup") {
+    game.randomizePlayerShips();
+  }
+});
+
 startBtn?.addEventListener("click", () => {
   const res = game.startGame();
   if (!res.ok) setStatus(res.message);
+});
+
+newGameBtn?.addEventListener("click", () => {
+  game.reset();
 });
 
 // ----- Render handler (called by Game) -----
@@ -138,9 +230,17 @@ function render(state) {
   renderBoard(playerBoardEl, state.playerBoard, true);
   renderBoard(targetBoardEl, state.cpuBoard, false);
 
-  // Start button enabled only after setup
+  // Start button enabled only after setup complete
   if (startBtn) {
     startBtn.disabled = !(state.phase === "setup" && state.setupComplete);
+  }
+
+  // Rotate and Randomize only enabled during setup
+  if (rotateBtn) {
+    rotateBtn.disabled = state.phase !== "setup";
+  }
+  if (randomizeBtn) {
+    randomizeBtn.disabled = state.phase !== "setup";
   }
 
   // Optional visual blocking of target board

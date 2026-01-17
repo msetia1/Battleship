@@ -47,6 +47,14 @@ body {
   background: #ccc;
 }
 
+.cell.preview {
+  background: #a0c4a0;
+}
+
+.cell.preview-invalid {
+  background: #e0a0a0;
+}
+
 .cell.hit {
   background: #e74c3c;
 }

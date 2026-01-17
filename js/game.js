@@ -88,6 +88,18 @@ export class Game {
     return { ok: true, message: "Ship placed." };
   }
 
+  randomizePlayerShips() {
+    if (this.phase !== "setup") return { ok: false, message: "Not in setup." };
+
+    this.playerBoard.randomizeShips(CONFIG.SHIPS);
+    this.playerShips = this.playerBoard.ships;
+    this.shipIndex = this.playerShips.length;
+
+    this._status("Ships randomized. Click Start Game.");
+    this._emit();
+    return { ok: true, message: "Ships randomized." };
+  }
+
   startGame() {
     if (this.phase !== "setup")
       return { ok: false, message: "Game already started." };
