@@ -130,4 +130,9 @@ export class Board {
       }
     }
   }
+
+  reset() {
+    this.grid = this.createGrid();
+    this.ships = [];
+  }
 }
