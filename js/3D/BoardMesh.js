@@ -7,7 +7,7 @@ export class BoardMesh {
     this.gridSize = CONFIG.GRID_SIZE;
     this.cellSize = 1;
     this.boardSize = this.gridSize * this.cellSize;
-    this.holeRadius = 0.35;
+    this.holeRadius = 0.25;
     this.holeDepth = 0.25;
     this.boardThickness = 0.5;
     this.rimHeight = 0.3;
