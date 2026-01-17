@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js';
-import { Ship } from './ship.js';
+import { CONFIG } from "./config.js";
+import { Ship } from "./ship.js";
 
 export class Board {
   constructor(gridSize = CONFIG.GRID_SIZE) {
@@ -40,10 +40,15 @@ export class Board {
     const positions = [];
 
     for (let i = 0; i < ship.size; i++) {
-      const posX = orientation === 'horizontal' ? x + i : x;
-      const posY = orientation === 'vertical' ? y + i : y;
+      const posX = orientation === "horizontal" ? x + i : x;
+      const posY = orientation === "vertical" ? y + i : y;
 
-      if (posX < 0 || posX >= this.gridSize || posY < 0 || posY >= this.gridSize) {
+      if (
+        posX < 0 ||
+        posX >= this.gridSize ||
+        posY < 0 ||
+        posY >= this.gridSize
+      ) {
         return null;
       }
 
@@ -72,13 +77,13 @@ export class Board {
 
   receiveAttack(x, y) {
     if (x < 0 || x >= this.gridSize || y < 0 || y >= this.gridSize) {
-      return 'invalid';
+      return "invalid";
     }
 
     const cell = this.grid[y][x];
 
     if (cell === CONFIG.CELL_STATE.HIT || cell === CONFIG.CELL_STATE.MISS) {
-      return 'invalid';
+      return "invalid";
     }
 
     if (cell === CONFIG.CELL_STATE.SHIP) {
@@ -87,13 +92,13 @@ export class Board {
       ship.hit();
 
       if (ship.isSunk()) {
-        return 'sunk';
+        return "sunk";
       }
-      return 'hit';
+      return "hit";
     }
 
     this.grid[y][x] = CONFIG.CELL_STATE.MISS;
-    return 'miss';
+    return "miss";
   }
 
   getShipAt(x, y) {
@@ -108,6 +113,6 @@ export class Board {
   }
 
   allShipsSunk() {
-    return this.ships.length > 0 && this.ships.every(ship => ship.isSunk());
+    return this.ships.length > 0 && this.ships.every((ship) => ship.isSunk());
   }
 }
