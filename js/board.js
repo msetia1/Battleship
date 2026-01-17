@@ -116,7 +116,7 @@ export class Board {
     return this.ships.length > 0 && this.ships.every((ship) => ship.isSunk());
   }
 
-  placeShipsRandomly(shipConfigs) {
+  randomizeShips(shipConfigs) {
     for (const config of shipConfigs) {
       const ship = new Ship(config.name, config.size);
       let placed = false;
