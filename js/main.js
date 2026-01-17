@@ -1,27 +1,45 @@
 // js/main.js
-import { Board } from "./board.js";
 import { CONFIG } from "./config.js";
+import { Game } from "./game.js";
 
 const playerBoardEl = document.getElementById("player-board");
 const targetBoardEl = document.getElementById("target-board");
 
-const playerBoard = new Board();
-const targetBoard = new Board();
+const statusEl = document.getElementById("status");
+const rotateBtn = document.getElementById("rotate-btn");
+const startBtn = document.getElementById("start-btn");
 
-function buildGrid(container) {
+function setStatus(text) {
+  if (statusEl) statusEl.textContent = text;
+}
+
+/**
+ * Build GRID_SIZE x GRID_SIZE DOM cells once.
+ * onCellClick(x,y) is called when user clicks a cell.
+ */
+function buildGrid(container, onCellClick) {
   container.innerHTML = "";
 
   for (let y = 0; y < CONFIG.GRID_SIZE; y++) {
     for (let x = 0; x < CONFIG.GRID_SIZE; x++) {
       const cell = document.createElement("div");
       cell.className = "cell";
-      cell.dataset.x = x;
-      cell.dataset.y = y;
+      cell.dataset.x = String(x);
+      cell.dataset.y = String(y);
+
+      if (onCellClick) {
+        cell.addEventListener("click", () => onCellClick(x, y));
+      }
+
       container.appendChild(cell);
     }
   }
 }
 
+/**
+ * Render a board into an existing grid container.
+ * revealShips=true shows ships; false hides ships (target board).
+ */
 function renderBoard(container, board, revealShips) {
   const cells = container.querySelectorAll(".cell");
 
@@ -31,20 +49,63 @@ function renderBoard(container, board, revealShips) {
     const state = board.grid[y][x];
 
     cell.className = "cell";
-    if (state === CONFIG.CELL_STATE.SHIP && revealShips)
-      cell.classList.add("ship");
+
+    // Always show shots
     if (state === CONFIG.CELL_STATE.HIT) cell.classList.add("hit");
     if (state === CONFIG.CELL_STATE.MISS) cell.classList.add("miss");
+
+    // Only show ships when allowed
+    if (revealShips && state === CONFIG.CELL_STATE.SHIP) {
+      cell.classList.add("ship");
+    }
   });
 }
 
-buildGrid(playerBoardEl);
-buildGrid(targetBoardEl);
+// ----- Create game -----
+const game = new Game({
+  onStateChange: render,
+  onStatus: setStatus,
+});
 
-// TEMP: place a test ship so you can see something
-playerBoard.grid[2][3] = CONFIG.CELL_STATE.SHIP;
-playerBoard.grid[2][4] = CONFIG.CELL_STATE.SHIP;
-playerBoard.grid[2][5] = CONFIG.CELL_STATE.SHIP;
+// ----- Build grids -----
+buildGrid(playerBoardEl, (x, y) => {
+  const state = game.getState();
 
-renderBoard(playerBoardEl, playerBoard, true);
-renderBoard(targetBoardEl, targetBoard, false);
+  // Setup: place ships on player board
+  if (state.phase === "setup") {
+    const res = game.tryPlacePlayerShip(x, y);
+    if (!res.ok) setStatus(res.message);
+  }
+});
+
+buildGrid(targetBoardEl, (x, y) => {
+  const state = game.getState();
+
+  // Gameplay: attack CPU board
+  if (state.phase === "play") {
+    const res = game.playerAttack(x, y);
+    if (!res.ok) setStatus(res.message);
+  }
+});
+
+// ----- Buttons -----
+rotateBtn?.addEventListener("click", () => game.toggleOrientation());
+
+startBtn?.addEventListener("click", () => {
+  const res = game.startGame();
+  if (!res.ok) setStatus(res.message);
+});
+
+// ----- Render handler (called by Game) -----
+function render(state) {
+  renderBoard(playerBoardEl, state.playerBoard, true);
+  renderBoard(targetBoardEl, state.cpuBoard, false);
+
+  // Start button enabled only after setup
+  if (startBtn) {
+    startBtn.disabled = !(state.phase === "setup" && state.setupComplete);
+  }
+
+  // Optional visual blocking of target board
+  targetBoardEl.classList.toggle("blocked", state.phase !== "play");
+}

@@ -3,24 +3,36 @@
   <head>
     <meta charset="UTF-8" />
     <title>Battleship</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
     <h1>Battleship</h1>
-    <div id="status">Loading…</div>
 
-    <div style="display: flex; gap: 40px">
-      <div>
-        <h3>Your Board</h3>
+    <!-- Status / prompt text -->
+    <div id="status" class="status">Loading game…</div>
+
+    <!-- Boards -->
+    <div class="boards">
+      <div class="board-container">
+        <h2>Your Board</h2>
         <div id="player-board" class="board"></div>
       </div>
 
-      <div>
-        <h3>Target Board</h3>
+      <div class="board-container">
+        <h2>Target Board</h2>
         <div id="target-board" class="board"></div>
       </div>
     </div>
 
+    <!-- Controls -->
+    <div class="controls">
+      <button id="rotate-btn">Rotate Ship</button>
+      <button id="start-btn" disabled>Start Game</button>
+    </div>
+
+    <!-- Main JS entry -->
     <script type="module" src="js/main.js"></script>
   </body>
 </html>
