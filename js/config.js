@@ -13,6 +13,7 @@ export const CONFIG = {
       EMPTY: 'empty',
       SHIP: 'ship',
       HIT: 'hit',
-      MISS: 'miss'
+      MISS: 'miss',
+      SUNK: 'sunk'
     }
   };

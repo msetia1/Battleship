@@ -82,7 +82,7 @@ export class Board {
 
     const cell = this.grid[y][x];
 
-    if (cell === CONFIG.CELL_STATE.HIT || cell === CONFIG.CELL_STATE.MISS) {
+    if (cell === CONFIG.CELL_STATE.HIT || cell === CONFIG.CELL_STATE.MISS || cell === CONFIG.CELL_STATE.SUNK) {
       return "invalid";
     }
 
@@ -92,6 +92,7 @@ export class Board {
       ship.hit();
 
       if (ship.isSunk()) {
+        this.markShipSunk(ship);
         return "sunk";
       }
       return "hit";
@@ -99,6 +100,12 @@ export class Board {
 
     this.grid[y][x] = CONFIG.CELL_STATE.MISS;
     return "miss";
+  }
+
+  markShipSunk(ship) {
+    for (const pos of ship.positions) {
+      this.grid[pos.y][pos.x] = CONFIG.CELL_STATE.SUNK;
+    }
   }
 
   getShipAt(x, y) {

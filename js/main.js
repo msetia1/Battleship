@@ -53,10 +53,47 @@ function renderBoard(container, board, revealShips) {
     // Always show shots
     if (state === CONFIG.CELL_STATE.HIT) cell.classList.add("hit");
     if (state === CONFIG.CELL_STATE.MISS) cell.classList.add("miss");
+    if (state === CONFIG.CELL_STATE.SUNK) cell.classList.add("sunk");
 
     // Only show ships when allowed
     if (revealShips && state === CONFIG.CELL_STATE.SHIP) {
       cell.classList.add("ship");
+    }
+
+    // Check if this cell is part of a ship
+    const isShip = state === CONFIG.CELL_STATE.SHIP || state === CONFIG.CELL_STATE.HIT || state === CONFIG.CELL_STATE.SUNK;
+
+    // Add ship borders (show on player board always, on enemy board only when sunk)
+    const showBorders = isShip && (revealShips || state === CONFIG.CELL_STATE.SUNK);
+    
+    if (showBorders) {
+      const currentShip = board.getShipAt(x, y);
+      
+      if (currentShip) {
+        // Check top
+        const topShip = y > 0 ? board.getShipAt(x, y - 1) : null;
+        if (topShip !== currentShip) {
+          cell.classList.add("border-top");
+        }
+
+        // Check right
+        const rightShip = x < CONFIG.GRID_SIZE - 1 ? board.getShipAt(x + 1, y) : null;
+        if (rightShip !== currentShip) {
+          cell.classList.add("border-right");
+        }
+
+        // Check bottom
+        const bottomShip = y < CONFIG.GRID_SIZE - 1 ? board.getShipAt(x, y + 1) : null;
+        if (bottomShip !== currentShip) {
+          cell.classList.add("border-bottom");
+        }
+
+        // Check left
+        const leftShip = x > 0 ? board.getShipAt(x - 1, y) : null;
+        if (leftShip !== currentShip) {
+          cell.classList.add("border-left");
+        }
+      }
     }
   });
 }

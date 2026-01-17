@@ -26,22 +26,20 @@ body {
   display: grid;
   grid-template-columns: repeat(10, 30px);
   grid-template-rows: repeat(10, 30px);
-  gap: 2px;
   user-select: none;
-}
-
-.board.blocked {
-  pointer-events: none;
-  opacity: 0.6;
+  border-top: 1px solid #999;
+  border-left: 1px solid #999;
 }
 
 /* Cells */
 .cell {
   width: 30px;
   height: 30px;
-  border: 1px solid #999;
+  border-right: 1px solid #999;
+  border-bottom: 1px solid #999;
   background: white;
   cursor: pointer;
+  box-sizing: border-box;
 }
 
 /* Board states */
@@ -50,11 +48,32 @@ body {
 }
 
 .cell.hit {
-  background: #e74c3c; /* red */
+  background: #e74c3c;
 }
 
 .cell.miss {
-  background: #85c1e9; /* light blue */
+  background: #85c1e9;
+}
+
+.cell.sunk {
+  background: #922;
+}
+
+/* Ship borders */
+.cell.border-top {
+  border-top: 2px solid #333;
+}
+
+.cell.border-right {
+  border-right: 2px solid #333;
+}
+
+.cell.border-bottom {
+  border-bottom: 2px solid #333;
+}
+
+.cell.border-left {
+  border-left: 2px solid #333;
 }
 
 /* Controls */
