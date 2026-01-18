@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from "three";
 
 export class CameraController {
   constructor(camera) {
@@ -9,9 +9,9 @@ export class CameraController {
     this.setupPosition = new THREE.Vector3(0, 18, 6);
     this.setupLookAt = new THREE.Vector3(0, 0, 6);
 
-    // Play: pulled back and higher to see both boards
-    this.playPosition = new THREE.Vector3(0, 28, 20);
-    this.playLookAt = new THREE.Vector3(0, 3, 0);
+    // Play: centered on casing, slightly closer
+    this.playPosition = new THREE.Vector3(1.8, 22, 30);
+    this.playLookAt = new THREE.Vector3(1.8, 7.0, 2);
 
     // Animation state
     this.isAnimating = false;
@@ -73,9 +73,7 @@ export class CameraController {
    * Easing function for smooth animation
    */
   easeInOutCubic(t) {
-    return t < 0.5
-      ? 4 * t * t * t
-      : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   }
 
   /**
@@ -92,14 +90,14 @@ export class CameraController {
     this.camera.position.lerpVectors(
       this.startPosition,
       this.targetPosition,
-      easedProgress
+      easedProgress,
     );
 
     // Interpolate lookAt
     this.currentLookAt.lerpVectors(
       this.startLookAt,
       this.targetLookAt,
-      easedProgress
+      easedProgress,
     );
     this.camera.lookAt(this.currentLookAt);
 
